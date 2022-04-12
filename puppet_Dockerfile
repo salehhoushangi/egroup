@@ -1,0 +1,8 @@
+FROM puppet/puppet-agent-ubuntu
+# copy your manifests
+COPY manifests/site.pp /puppet-manifests
+# install modules
+RUN puppet module install puppetlabs-apache --version 7.0.0
+RUN apt-get update
+# keep container running
+ENTRYPOINT ["tail", "-f", "/dev/null"]

@@ -7,8 +7,7 @@ services:
     volumes:
       - ./index-node1.html:/usr/share/nginx/html/index.html
     networks:
-      static-network:
-        ipv4_address: 172.20.128.2
+        static-network:
   nginx_node2:
     build:
       context: ./
@@ -16,37 +15,27 @@ services:
     volumes:
       - ./index-node2.html:/usr/share/nginx/html/index.html
     networks:
-      static-network:
-        ipv4_address: 172.20.128.3
-  proxy_node1:
-    build:
-      context: ./
-      dockerfile: ./proxy_Dockerfile
+        static-network:
+  loadbalancer_node:
+    image: haproxy:1.7-alpine
+    depends_on:
+      - nginx_node1
+      - nginx_node2
     ports:
-      - 8000:6301
+      - 80:80
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-      - ./keepalived-master.conf:/etc/keepalived/keepalived.conf
-    networks:
-        static-network:
-          ipv4_address: 172.20.128.4
     cap_add: 
         - NET_ADMIN
-  proxy_node2:
-    build:
-      context: ./
-      dockerfile: ./proxy_Dockerfile
-    volumes:
-        - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-        - ./keepalived-slave.conf:/etc/keepalived/keepalived.conf
     networks:
-        static-network:
-          ipv4_address: 172.20.128.5
-    cap_add: 
-        - NET_ADMIN      
+      - static-network
+  puppet_pro:
+    build:
+     context: ./
+     dockerfile: puppet_Dockerfile
+     
+
+
 
 networks:
   static-network:
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
